@@ -7,6 +7,6 @@ authors:
     given-names: "Pablo"
   - familty-names: "Sana"
     given-names: "Hugues"
-title: matthiasfabry/tidal_deformation_2022: Tidal deformation
-version: v1.0
-date-released: 2017-12-18
+title: "Modeling overcontact binaries I: The effect of tidal deformation"
+version: "v1.2"
+date-released: 2022-01-12
