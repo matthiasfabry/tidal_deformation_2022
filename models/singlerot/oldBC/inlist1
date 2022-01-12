@@ -1,0 +1,367 @@
+
+&star_job
+   ! see star/defaults/star_job.defaults
+   ! display on-screen plots
+   pgstar_flag = .true.
+
+   new_rotation_flag = .true.
+   change_rotation_flag = .true.
+   set_initial_omega_div_omega_crit = .true.
+   new_omega_div_omega_crit = 1.0d-5
+!   relax_initial_omega_div_omega_crit = .true.
+
+   set_uniform_initial_composition = .true.
+   initial_h1 = 0.70d0
+   initial_h2 = 0d0
+   initial_he3 = 0d0
+   initial_he4 = 0.28d0
+   initial_zfracs = 6
+
+   relax_initial_Z = .true.
+   new_Z = 0.0142d0
+   relax_initial_Y = .true.
+   new_Y = 0.2703d0
+   initial_zfracs = 6
+
+
+!   pause_before_terminate = .true.
+/ ! end of star_job namelist
+
+
+&eos
+  ! eos options
+  ! see eos/defaults/eos.defaults
+  use_FreeEOS = .false.
+
+/ ! end of eos namelist
+
+
+&kap
+  ! kap options
+  ! see kap/defaults/kap.defaults
+   Zbase = 0.0142d0
+   kap_file_prefix = 'a09'
+   kap_CO_prefix = 'a09_co'
+
+/ ! end of kap namelist
+
+&controls
+
+   initial_mass = 5.d0
+   always_use_dedt_form_of_energy_eqn = .false. ! does not work well at high mdot
+
+   report_solver_progress = .true. ! set true to see info about solver iterations
+!   report_ierr = .true. ! if true, produce terminal output when have some internal error
+   stop_for_bad_nums = .true.
+
+!   solver_save_photo_call_number = 0
+!       Saves a photo when solver_call_number = solver_save_photo_call_number - 1
+!       e.g., useful for testing partials to set solver_call_number = solver_test_partials_call_number - 1
+
+!   solver_test_partials_call_number = 25
+!   solver_test_partials_k = 1
+!   solver_test_partials_iter_number = 1
+!   solver_test_partials_dx_0 = 1d-6
+!   solver_test_partials_var_name = 'all' ! 'all' or 'lnd', 'lnT', 'lnR', 'L', 'v', etc.    '' means code sets
+!   solver_test_partials_equ_name = 'all' ! 'all' or 'dlnE_dt', 'dlnd_dt', 'dlnR_dt', 'equL', etc   '' means code sets
+!   solver_test_partials_sink_name = 'si28' ! iso name to use for "sink" to keep sum = 1
+!   solver_test_partials_show_dx_var_name = 'h1'
+
+!   ! fp options
+    use_other_eval_fp_ft = .true.
+    use_other_eval_i_rot = .true.
+
+   ! diffuse ang mom to rigid rotation
+   set_uniform_am_nu_non_rot = .true.
+   uniform_am_nu_non_rot = 1d20
+
+!   BC options
+   use_other_surface_PT = .false.
+
+!  ! wind options
+    use_other_wind = .true.
+
+  ! mlt options
+    use_ledoux_criterion = .true.
+    mixing_length_alpha = 2d0
+    alpha_semiconvection = 100d0
+    thermohaline_coeff = 1d0
+    num_cells_for_smooth_gradL_composition_term = 0 ! avoid grid size dependent smoothing
+
+  ! we use step overshooting
+    overshoot_scheme(1) = 'step'
+    overshoot_zone_type(1) = 'burn_H'
+    overshoot_zone_loc(1) = 'core'
+    overshoot_bdy_loc(1) = 'top'
+    overshoot_f(1) = 0.345
+    overshoot_f0(1) = 0.01
+
+    !extra spatial resolution
+    mesh_delta_coeff = 1d0 ! only scale this for convergence tests
+    max_dq = 1d-3
+    min_dq_for_xa = 1d-3
+    mesh_Pgas_div_P_exponent = 0.5d0
+    max_allowed_nz = 20000
+    restore_mesh_on_retry = .true.
+
+    max_model_number = 20000
+    max_number_retries = 10000
+
+    ! extra controls for timestep
+    ! these are for changes in mdot at the onset of mass transfer
+    time_delta_coeff = 1d0 ! only scale this for convergence tests
+    varcontrol_target = 1d-3 ! this can artificially stall timestep for inflated envelope, rely on the rest of controls
+    delta_lg_star_mass_limit = 1d-3
+    delta_lg_star_mass_hard_limit = 2d-3
+    delta_HR_limit = 0.005d0
+    delta_HR_hard_limit = 0.02d0
+    ! relax default dHe/He, otherwise growing convective regions can cause things to go at a snail pace
+    dHe_div_He_limit = 5d0
+    dHe_div_He_limit_min_He = 1d-1
+    delta_lgL_He_limit = 0.025d0
+    delta_lgL_He_hard_limit = 0.05d0
+    ! we're not looking for much precision at the very late stages
+    dX_nuc_drop_limit = 5d-2
+    ! control central abundance changes
+    delta_XH_cntr_limit = 0.001d0
+    delta_XHe_cntr_limit = 0.001d0
+    delta_XO_cntr_limit = 0.001d0
+    delta_XC_cntr_limit = 0.001d0
+    delta_XH_cntr_hard_limit = 0.005d0
+    delta_XHe_cntr_hard_limit = 0.005d0
+    delta_XO_cntr_hard_limit = 0.005d0
+    delta_XC_cntr_hard_limit = 0.005d0
+    ! these stall the run artificially when not using dedt form
+    limit_for_rel_error_in_energy_conservation = -1d0
+    hard_limit_for_rel_error_in_energy_conservation = -1d0
+    warn_when_large_rel_run_E_err = 1d99
+    max_abs_rel_run_E_err = 1d99
+
+    relax_dY = 0.001d0
+
+    !never_skip_hard_limits = .true. ! we set this to false in extras_start_step, if its on from the beginning it can cause issues with relax
+
+    retry_hold = 5
+
+    ! output options
+    log_directory = 'LOGS'
+    profile_interval = 20
+    history_interval = 1
+    terminal_interval = 1
+    write_header_frequency = 10
+    max_num_profile_models = 10000
+
+    ! solver settings, most adjustements are to improve performance and reliability during MT and CE
+    solver_itermin_until_reduce_min_corr_coeff = 25
+    solver_max_tries_before_reject = 40
+    max_tries_for_retry = 40
+    tiny_corr_coeff_limit = 1000
+    corr_coeff_limit = 0.2d0
+    ignore_too_large_correction = .true.
+    ignore_min_corr_coeff_for_scale_max_correction = .true.
+    use_gold_tolerances = .true.
+    use_gold2_tolerances = .false.
+    gold_solver_iters_timestep_limit = 30
+    gold_iter_for_resid_tol3 = 10
+    gold_tol_residual_norm3 = 1d-6
+    gold_tol_max_residual3 = 1d-3
+    tol_max_correction = 1d-2
+    tol_correction_norm = 1d-3
+    max_corr_jump_limit = 1d99
+    max_resid_jump_limit = 1d99
+    redo_limit = -1
+
+    ! Fixing the position of the Lagrangian region of the mesh helps
+    ! convergence near the Eddington limit
+    max_logT_for_k_below_const_q = 100
+    max_q_for_k_below_const_q = 0.995
+    min_q_for_k_below_const_q = 0.995
+    max_logT_for_k_const_mass = 100
+    max_q_for_k_const_mass = 0.99
+    min_q_for_k_const_mass = 0.99
+
+/ ! end of controls namelist
+&pgstar
+   pgstar_interval = 1
+   !pause = .true.
+
+   pgstar_age_disp = 2.5
+   pgstar_model_disp = 2.5
+
+   !### scale for axis labels
+   pgstar_xaxis_label_scale = 1.3
+   pgstar_left_yaxis_label_scale = 1.3
+   pgstar_right_yaxis_label_scale = 1.3
+
+   Grid2_win_flag = .true.
+   !Grid2_win_flag = .false.
+
+   Grid2_win_width = 17
+   Grid2_win_aspect_ratio = 0.58 ! aspect_ratio = height/width
+
+   ! file output
+   Grid2_file_flag = .true.
+   Grid2_file_dir = 'png'
+   Grid2_file_prefix = 'grid_'
+   Grid2_file_interval = 100 ! output when mod(model_number,Grid2_file_interval)==0
+   Grid2_file_width = -1 ! negative means use same value as for window
+   Grid2_file_aspect_ratio = -1 ! negative means use same value as for window
+
+   Grid2_num_cols = 7 ! divide plotting region into this many equal width cols
+   Grid2_num_rows = 8 ! divide plotting region into this many equal height rows
+
+   Grid2_num_plots = 6 ! <= 10
+
+   Grid2_plot_name(1) = 'TRho_Profile'
+   Grid2_plot_row(1) = 1 ! number from 1 at top
+   Grid2_plot_rowspan(1) = 3 ! plot spans this number of rows
+   Grid2_plot_col(1) =  1 ! number from 1 at left
+   Grid2_plot_colspan(1) = 2 ! plot spans this number of columns
+   Grid2_plot_pad_left(1) = -0.05 ! fraction of full window width for padding on left
+   Grid2_plot_pad_right(1) = 0.01 ! fraction of full window width for padding on right
+   Grid2_plot_pad_top(1) = 0.00 ! fraction of full window height for padding at top
+   Grid2_plot_pad_bot(1) = 0.05 ! fraction of full window height for padding at bottom
+   Grid2_txt_scale_factor(1) = 0.65 ! multiply txt_scale for subplot by this
+
+
+   Grid2_plot_name(5) = 'Kipp'
+   Grid2_plot_row(5) = 4 ! number from 1 at top
+   Grid2_plot_rowspan(5) = 3 ! plot spans this number of rows
+   Grid2_plot_col(5) =  1 ! number from 1 at left
+   Grid2_plot_colspan(5) = 2 ! plot spans this number of columns
+   Grid2_plot_pad_left(5) = -0.05 ! fraction of full window width for padding on left
+   Grid2_plot_pad_right(5) = 0.01 ! fraction of full window width for padding on right
+   Grid2_plot_pad_top(5) = 0.03 ! fraction of full window height for padding at top
+   Grid2_plot_pad_bot(5) = 0.0 ! fraction of full window height for padding at bottom
+   Grid2_txt_scale_factor(5) = 0.65 ! multiply txt_scale for subplot by this
+   Kipp_title = ''
+   Kipp_show_mass_boundaries = .false.
+
+   Grid2_plot_name(6) = 'HR'
+   HR_title = ''
+   Grid2_plot_row(6) = 7 ! number from 1 at top
+   Grid2_plot_rowspan(6) = 2 ! plot spans this number of rows
+   Grid2_plot_col(6) =  6 ! number from 1 at left
+   Grid2_plot_colspan(6) = 2 ! plot spans this number of columns
+   !Grid2_plot_pad_left(6) = 0.00 ! fraction of full window width for padding on left
+   !Grid2_plot_pad_right(6) = 0.05 ! fraction of full window width for padding on right
+   !Grid2_plot_pad_top(6) = 0.03 ! fraction of full window height for padding at top
+   !Grid2_plot_pad_bot(6) = 0.0 ! fraction of full window height for padding at bottom
+   !Grid2_txt_scale_factor(6) = 0.65 ! multiply txt_scale for subplot by this
+
+   Grid2_plot_pad_left(6) = 0.05 ! fraction of full window width for padding on left
+   Grid2_plot_pad_right(6) = -0.01 ! fraction of full window width for padding on right
+   Grid2_plot_pad_top(6) = 0.0 ! fraction of full window height for padding at top
+   Grid2_plot_pad_bot(6) = 0.0 ! fraction of full window height for padding at bottom
+   Grid2_txt_scale_factor(6) = 0.65 ! multiply txt_scale for subplot by this
+
+   Grid2_plot_name(2) = 'Text_Summary1'
+   Grid2_plot_row(2) = 7 ! number from 1 at top
+   Grid2_plot_rowspan(2) = 2 ! plot spans this number of rows
+   Grid2_plot_col(2) = 1 ! number from 1 at left
+   Grid2_plot_colspan(2) = 4 ! plot spans this number of columns
+   Grid2_plot_pad_left(2) = -0.08 ! fraction of full window width for padding on left
+   Grid2_plot_pad_right(2) = -0.10 ! fraction of full window width for padding on right
+   Grid2_plot_pad_top(2) = 0.08 ! fraction of full window height for padding at top
+   Grid2_plot_pad_bot(2) = -0.04 ! fraction of full window height for padding at bottom
+   Grid2_txt_scale_factor(2) = 0.19 ! multiply txt_scale for subplot by this
+
+   Grid2_plot_name(3) = 'Profile_Panels3'
+   Profile_Panels3_title = 'Abundance-Power-Mixing'
+   Profile_Panels3_num_panels = 3
+   Profile_Panels3_yaxis_name(1) = 'Abundance'
+   Profile_Panels3_yaxis_name(2) = 'Power'
+   Profile_Panels3_yaxis_name(3) = 'Mixing'
+
+   Profile_Panels3_xaxis_name = 'mass'
+   Profile_Panels3_xaxis_reversed = .false.
+   !Profile_Panels3_xmin = 20.2d0 ! only used if /= -101d0
+   !Profile_Panels3_xmax = 20.6d0 ! 10 ! only used if /= -101d0
+
+   Grid2_plot_row(3) = 1 ! number from 1 at top
+   Grid2_plot_rowspan(3) = 6 ! plot spans this number of rows
+   Grid2_plot_col(3) = 3 ! plot spans this number of columns
+   Grid2_plot_colspan(3) = 3 ! plot spans this number of columns
+
+   Grid2_plot_pad_left(3) = 0.09 ! fraction of full window width for padding on left
+   Grid2_plot_pad_right(3) = 0.07 ! fraction of full window width for padding on right
+   Grid2_plot_pad_top(3) = 0.0 ! fraction of full window height for padding at top
+   Grid2_plot_pad_bot(3) = 0.0 ! fraction of full window height for padding at bottom
+   Grid2_txt_scale_factor(3) = 0.65 ! multiply txt_scale for subplot by this
+
+   Abundance_line_txt_scale_factor = 1.1 ! relative to other text
+   Abundance_legend_txt_scale_factor = 1.1 ! relative to other text
+   Abundance_legend_max_cnt = 0
+   Abundance_log_mass_frac_min = -3.5 ! only used if < 0
+
+
+   show_TRho_Profile_kap_regions = .false.
+   show_TRho_Profile_gamma1_4_3rd = .true.
+         TRho_Profile_xmin = -12
+         !TRho_Profile_xmax = 10
+         TRho_Profile_ymin = 3
+         !TRho_Profile_ymax = 10
+
+
+   Grid2_plot_name(4) = 'Profile_Panels4'
+   Grid2_plot_row(4) = 1 ! number from 1 at top
+   Grid2_plot_rowspan(4) = 5 ! plot spans this number of rows
+   Grid2_plot_col(4) =  6 ! number from 1 at left
+   Grid2_plot_colspan(4) = 2 ! plot spans this number of columns
+   Grid2_plot_pad_left(4) = 0.06 ! fraction of full window width for padding on left
+   Grid2_plot_pad_right(4) = 0.01 ! fraction of full window width for padding on right
+   Grid2_plot_pad_top(4) = 0.0 ! fraction of full window height for padding at top
+   Grid2_plot_pad_bot(4) = 0.07 ! fraction of full window height for padding at bottom
+   Grid2_txt_scale_factor(4) = 0.65 ! multiply txt_scale for subplot by this
+
+   Profile_Panels4_title = 'rotation'
+   Profile_Panels4_num_panels = 2
+   Profile_Panels4_xaxis_name = 'radius'
+   Profile_Panels4_xaxis_reversed = .false.
+
+   Profile_Panels4_yaxis_name(1) = 'fp_rot'
+   Profile_Panels4_other_yaxis_name(1) = 'ft_rot'
+
+   Profile_Panels4_yaxis_name(2) = 'omega'
+   Profile_Panels4_other_yaxis_name(2) = 'w_div_w_crit_roche'
+
+   !show_TRho_Profile_eos_regions = .true.
+
+   !Profile_Panels1_win_flag = .true.
+   !   Profile_Panels1_title = ''
+   !
+   !   Profile_Panels1_xaxis_name = 'mass'
+   !
+   !   !Profile_Panels1_xmin = 20.2d0 ! only used if /= -101d0
+   !   !Profile_Panels1_xmax = 20.6d0 ! 100.1 ! -101d0 ! only used if /= -101d0
+   !   Profile_Panels1_num_panels = 3
+   !
+   !   Profile_Panels1_yaxis_name(1) = 'logRho'
+   !   Profile_Panels1_other_yaxis_name(1) = 'logxq'
+   !   Profile_Panels1_other_ymin(1) = -10d0 ! only used if /= -101d0
+   !
+   !   Profile_Panels1_yaxis_name(2) = 'logT'
+   !   Profile_Panels1_other_yaxis_name(2) = 'entropy' ! 'vel_km_per_s'
+   !
+   !
+   !   Profile_Panels1_yaxis_name(3) = 'log_Lrad_div_Ledd'
+   !
+   !   Profile_Panels1_other_yaxis_name(3) = 'log_opacity' ! 'mass'
+
+   !Profile_Panels1_other_ymin(3) = -10d0 ! only used if /= -101d0
+   ! Profile_Panels1_xaxis_name = 'q'
+   ! Profile_Panels1_xaxis_reversed = .false.
+   ! Profile_Panels1_xmin = 0.99998!-101d0
+   ! Profile_Panels1_xmax = -101d0
+   ! Profile_Panels1_xmargin = 0d0
+   ! Profile_Panels1_show_mix_regions_on_xaxis = .false.
+
+   !   ! ::
+
+   ! Profile_Panels1_num_panels = 2
+   ! Profile_Panels1_yaxis_name(1) = 'logT'
+   ! Profile_Panels1_other_yaxis_name(1) = 'entropy'
+   ! Profile_Panels1_yaxis_name(2) = 'gradr'
+   ! Profile_Panels1_other_yaxis_name(2) = 'gradT_sub_grada'
+
+/ ! end of pgstar namelist

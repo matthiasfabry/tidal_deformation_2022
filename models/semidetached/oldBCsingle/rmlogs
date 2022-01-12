@@ -1,0 +1,14 @@
+#!/bin/zsh
+
+if [ -d "./LOGS1/" ]; then
+    rm -r "./LOGS1"
+fi
+if [ -d "./LOGS/" ]; then
+    rm -r "./LOGS"
+fi
+if [ -d "./png/" ]; then
+    rm -r "./png"
+fi
+if [ -d "./photos" ]; then
+    rm -r "./photos"
+fi

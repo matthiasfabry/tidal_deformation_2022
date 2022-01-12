@@ -1,0 +1,82 @@
+&binary_job
+
+   inlist_names(1) = 'inlist1'
+!   inlist_names(2) = 'inlist2'
+
+   evolve_both_stars = .true.
+   change_model_twins_flag = .true.
+   new_model_twins_flag = .true.
+
+   change_initial_ignore_rlof_flag = .true.
+   new_ignore_rlof_flag = .true.
+
+/ ! end of binary_job namelist
+
+&binary_controls
+
+   accretor_overflow_terminate = 1.0d0
+
+   ! be 100% sure MB is always off
+   do_jdot_mb = .false.
+
+   ! using rotation
+   do_jdot_ls = .true.
+   do_j_accretion = .true.
+   do_jdot_missing_wind = .true.
+
+   terminate_if_initial_overflow = .false.
+   terminate_if_L2_overflow = .true.
+
+   photo_interval = 20
+   history_interval = 1
+   terminal_interval=1
+
+   ! initial conditions specified in extra inlist
+   read_extra_binary_controls_inlist1 = .true.
+   extra_binary_controls_inlist1_name = "inlist_extra"
+
+!   ! timestep controls
+   fr = 0.05
+   fr_limit = 1d-2
+   fr_dt_limit = 10
+   fm = 0.001
+   fm_hard = 0.005
+   fm_limit = 1d-4
+   fj = 1d99
+   fj_hard = 1d99
+!   fa = 1d99
+!   fa_hard = 1d99
+   dt_softening_factor = 0.4
+   fdm = 0.001
+   fdm_hard = 0.002
+
+   ! implicit solver setting
+   mdot_scheme='contact'
+   report_rlo_solver_progress = .true.
+   max_tries_to_achieve = 20
+   max_implicit_abs_mdot = 1d-0
+   implicit_scheme_tolerance = 1d-2
+   min_change_factor = 1.002d0
+   max_change_factor = 1.5d0
+   initial_change_factor = 1.5d0
+   change_factor_fraction = 0.8d0
+   implicit_lambda = 0.4d0
+   implicit_scheme_tiny_factor = 1d-4
+   min_mdot_for_implicit = 1d-99
+   starting_mdot = 1d-7
+   roche_min_mdot = 1d-8
+
+  ! explicit mdot settings
+   max_explicit_abs_mdot = 1d-2 ! Msun/yr
+   cur_mdot_frac = 0d0 ! no smoothing
+
+!   limit_retention_by_mdot_edd = .false.
+   do_wind_mass_transfer_1 = .true.
+
+   sync_mode_1 = "Uniform"
+   sync_type_1 = "Orb_period"
+   Ftid_1 = 1
+   do_initial_orbit_sync_1 = .true.
+   do_tidal_sync = .true.
+
+/ ! end of binary_controls namelist
