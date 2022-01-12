@@ -1,0 +1,12 @@
+cff-version: 1.1.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: Fabry
+    given-names: Matthias
+  - family-names: Marchant
+    given-names: Pablo
+  - familty-names: Sana
+    given-names: Hugues
+title: matthiasfabry/tidal_deformation_2022: Tidal deformation
+version: v1.0
+date-released: 2017-12-18
